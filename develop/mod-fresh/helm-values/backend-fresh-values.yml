@@ -1,0 +1,64 @@
+deployment: 
+  name: backend-fresh
+  image: asia-southeast1-docker.pkg.dev/myorder-beta/kubernetes/mod-fresh/backend-fresh
+  tag: develop-2cb98e0f90748d27e09458561de853ea511c4e01
+  dep: 
+    - deployment: 
+        namespace: mod-fresh-dev
+        replicas: 1
+        port: 3000
+        resource: 
+          cpuRequest: 25m
+          memoryRequest: 548Mi
+          memoryLimit: 685Mi
+        hpa: 
+          enabled: false
+      priorityClassName: tier-3
+      labels: 
+        team: unknown
+      liveness: 
+        isEnabled: false
+      readiness: 
+        isEnabled: false
+      ingress: 
+        - host: fresh-backend-dev.myorder.dev
+          path: /
+          name: api
+          kongPlugin: "cors-global-plugin,prometheus-kong"
+          tlsSecret: tls-myorder-dev-gateway
+          class: kong
+      volumes: 
+        GCLOUD: 
+          name: gcp-service-account
+          mountPath: /etc/credentials
+          secretName: gcp-service-account
+      extraEnv: 
+        APP_ENV: beta
+        GOOGLE_APPLICATION_CREDENTIALS: /etc/credentials/myorder-beta-eb5bdd1ce30b.json
+        FRONTEND_URL: https://fresh-dev.myorder.dev/
+      extraEnvSecret: 
+        MONGODB_HOST: 
+          secretName: mongodb
+          secretKey: mongodb-host
+        JWT_SECRET: 
+          secretName: jwt
+          secretKey: secret-key
+        MAIL_HOST: 
+          secretName: mail
+          secretKey: MAIL_HOST
+        MAIL_PORT: 
+          secretName: mail
+          secretKey: MAIL_PORT
+        MAIL_USER: 
+          secretName: mail
+          secretKey: MAIL_USER
+        MAIL_PASS: 
+          secretName: mail
+          secretKey: MAIL_PASS
+        MAIL_FROM: 
+          secretName: mail
+          secretKey: MAIL_FROM
+      configMapRef: 
+        MONGODB_OPTIONS: 
+          configMapName: mongodb
+          configMapKey: optionsAtlas
