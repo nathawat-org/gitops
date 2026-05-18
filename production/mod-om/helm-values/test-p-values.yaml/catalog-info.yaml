@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: 
+  annotations:
+    argocd/app-name: 
+    backstage.io/kubernetes-id: 
+spec:
+  type: service
+  owner: 
+  lifecycle: experimental

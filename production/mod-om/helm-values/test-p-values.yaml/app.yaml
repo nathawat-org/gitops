@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: 
+  labels:
+    backstage.io/kubernetes-id: 
+    description: 
+spec:
+  containers:
+    - name: 
+      image: nginx
+      ports:
+        - name: 
+          containerPort: 80
+          protocol: TCP
