@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: mod-om-staging-application-set-test
+  namespace: argo-cd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          - SERVICE_NAME: order-management-service
+  template:
+    metadata:
+      name: >-
+        {{ if (dig "SHORT_NAME" "" .)}}{{.SHORT_NAME}}{{else}}mod-om-{{.SERVICE_NAME}}{{end}}-v2-staging
+      namespace: argo-cd
+    spec:
+      project: staging
+      sources:
+        - repoURL: https://myorder-intelligence.github.io/mod-helm-charts/
+          targetRevision: >-
+            {{dig "HELM_CENTRALIZE_VERSION" "1.12.18" .}}
+          chart: mod-centralize-helm-charts-beta
+          helm:
+            releaseName: >-
+              {{ if (dig "SHORT_NAME" "" .)}}{{.SHORT_NAME}}{{else}}mod-om-{{.SERVICE_NAME}}{{end}}-v2-staging
+            valueFiles:
+              - $values/staging/mod-om/helm-values/{{.SERVICE_NAME}}-values.yml
+        - repoURL: https://github.com/myorder-intelligence/mod-gitops-nonprod.git
+          targetRevision: HEAD
+          ref: values
+      destination:
+        name: staging
+        namespace: mod-om
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+  templatePatch: |
+    {{ if (dig "HPA_ENABLED" "false" .) }}
+    spec:
+      ignoreDifferences:
+      - group: apps
+        kind: Deployment
+        jsonPointers:
+          - /spec/replicas
+    {{ end }}
