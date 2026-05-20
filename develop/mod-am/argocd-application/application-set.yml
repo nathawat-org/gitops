@@ -11,7 +11,11 @@ spec:
   generators:
     - list:
         elements:
-          - SERVICE_NAME: account-management-service
+          - SERVICE_NAME: account-management1-service
+          # Disable HPA
+          - SERVICE_NAME: account-management2-service
+            HPA_ENABLED: false
+          - SERVICE_NAME: account-management3-service
   template:
     metadata:
       name: >-
