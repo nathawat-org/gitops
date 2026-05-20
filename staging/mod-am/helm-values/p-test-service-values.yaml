@@ -1,0 +1,49 @@
+deployment:
+  name: p-test-service
+  image: asia-southeast1-docker.pkg.dev/myorder-staging/kubernetes/mod-am/p-test-service
+  tag: init
+  dep:
+    - deployment:
+        subName: ""
+        namespace: mod-am-staging
+        replicas: 2
+        resource:
+          cpuRequest: 25m
+          memoryRequest: 150Mi
+          memoryLimit: 150Mi
+        port: 8080
+        hpa:
+          enabled: true
+      priorityClassName: tier-3
+      labels:
+        team: unknown
+      liveness:
+        isEnabled: true
+        httpGet:
+          path: /healthz
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 15
+        timeoutSeconds: 5
+        failureThreshold: 3
+      readiness:
+        isEnabled: true
+        httpGet:
+          path: /healthz
+          port: 8080
+        initialDelaySeconds: 10
+        periodSeconds: 15
+        timeoutSeconds: 5
+        failureThreshold: 3
+      volumes:
+        GCLOUD:
+          name: gcp-mod-am-svc
+          mountPath: /etc/credentials-gcp
+          secretName: gcp-mod-am-svc
+      extraEnv:
+        APP_ENV: 
+        GOOGLE_APPLICATION_CREDENTIALS: /etc/credentials/gcp-mod-am-svc.json
+        LOG_LEVEL: debug
+        COLOR: red
+        HIGHT: 120cm
+        WEIGHT: 80kg
