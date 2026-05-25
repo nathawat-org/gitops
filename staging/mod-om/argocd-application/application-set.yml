@@ -12,6 +12,7 @@ spec:
     - list:
         elements:
           - SERVICE_NAME: order-management-service
+          - SERVICE_NAME: test-ingress
   template:
     metadata:
       name: >-

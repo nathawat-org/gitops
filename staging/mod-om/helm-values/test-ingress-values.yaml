@@ -1,0 +1,44 @@
+deployment:
+  name: test-ingress
+  image: asia-southeast1-docker.pkg.dev/myorder-staging/kubernetes/mod-om/test-ingress
+  tag: init
+  dep:
+    - deployment:
+        subName: ""
+        namespace: mod-om-staging
+        replicas: 2resource:
+          cpuRequest: 25m
+          memoryRequest: 150Mi
+          memoryLimit: 150Mi
+        port: 8080
+        hpa:
+      priorityClassName: tier-3
+      labels:
+        team: unknown
+      liveness:
+        isEnabled: true
+        httpGet:
+          path: /healthz
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 15
+        timeoutSeconds: 5
+        failureThreshold: 3
+      readiness:
+        isEnabled: true
+        httpGet:
+          path: /healthz
+          port: 8080
+        initialDelaySeconds: 10
+        periodSeconds: 15
+        timeoutSeconds: 5
+        failureThreshold: 3volumes:
+        GCLOUD:
+          name: gcp-mod-om-svc
+          mountPath: /etc/credentials-gcp
+          secretName: gcp-mod-om-svc
+      extraEnv:
+        APP_ENV: 
+        GOOGLE_APPLICATION_CREDENTIALS: /etc/credentials/gcp-mod-om-svc.json
+
+        LOG_LEVEL: debug
