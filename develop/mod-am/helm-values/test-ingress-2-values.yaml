@@ -1,0 +1,42 @@
+deployment:
+  isCronJobEnable: true
+  name: test-ingress-2
+  image: asia-southeast1-docker.pkg.dev/myorder-beta/kubernetes/mod-am/test-ingress-2
+  tag: init
+  dep:
+    - deployment:
+        subName: ""
+        namespace: mod-am-dev
+        replicas: 1
+        resource:
+          cpuRequest: 25m
+          memoryRequest: 150Mi
+          memoryLimit: 150Mi
+        port: 8080
+        hpa:
+          enabled: false
+      schedule: 0 17 * * *
+      priorityClassName: tier-3
+      labels:
+        team: team-a
+      ingress:
+        - name: api
+          host: localhost
+          path: /
+          kongPlugin: "kong-jwt,cors-global-plugin,prometheus-kong"
+          tlsSecret: tls-myorder-dev-gateway
+        - name: role-api
+          host: localhost
+          path: /role
+          kongPlugin: "kong-jwt,cors-global-plugin,prometheus-kong"
+          tlsSecret: tls-myorder-dev-gateway
+      volumes:
+        GCLOUD:
+          name: gcp-mod-am-svc
+          mountPath: /etc/credentials-gcp
+          secretName: gcp-mod-am-svc
+      extraEnv:
+        APP_ENV: 
+        GOOGLE_APPLICATION_CREDENTIALS: /etc/credentials/gcp-mod-am-svc.json
+        LOG_LEVEL: debug
+        COLOR: red

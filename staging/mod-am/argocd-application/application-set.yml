@@ -12,6 +12,7 @@ spec:
     - list:
         elements:
           - SERVICE_NAME: account-management-service
+          - SERVICE_NAME: test-ingress-2
   template:
     metadata:
       name: >-
