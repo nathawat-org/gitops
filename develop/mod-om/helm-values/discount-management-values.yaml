@@ -1,0 +1,59 @@
+deployment:
+  name: discount-management
+  image: asia-southeast1-docker.pkg.dev/myorder-beta/kubernetes/mod-om/discount-management
+  tag: init
+  dep:
+    - deployment:
+        subName: "api"
+        namespace: mod-om-dev
+        replicas: 4
+        nodeSelector: 
+          pool: regular
+        resource:
+          cpuRequest: 1
+          memoryRequest: 512Mi
+          memoryLimit: 1Gi
+        port: 8080
+        hpa:
+          enabled: true
+          minReplicas: 3
+          maxReplicas: 8
+      priorityClassName: tier-3
+      labels:
+        team: team-b
+      liveness:
+        isEnabled: true
+        httpGet:
+          path: /healthz
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 15
+        timeoutSeconds: 5
+        failureThreshold: 3
+      readiness:
+        isEnabled: true
+        httpGet:
+          path: /healthz
+          port: 8080
+        initialDelaySeconds: 10
+        periodSeconds: 15
+        timeoutSeconds: 5
+        failureThreshold: 3
+      ingress:
+        - name: api
+          host: localhost
+          path: /discount
+          kongPlugin: "kong-jwt,cors-global-plugin,prometheus-kong"
+      volumes:
+        GCLOUD:
+          name: gcp-mod-om-svc
+          mountPath: /etc/credentials-gcp
+          secretName: gcp-mod-om-svc
+      extraEnv:
+        APP_ENV: develop
+        GOOGLE_APPLICATION_CREDENTIALS: /etc/credentials/gcp-mod-om-svc.json
+        LOG_LEVEL: debug
+        APP_MODE: api-dev
+        PERCENT_DISCOUNT: 70
+      extraSecrets:
+        - discount-management-secret
