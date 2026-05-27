@@ -1,0 +1,63 @@
+deployment:
+  name: test-review
+  image: asia-southeast1-docker.pkg.dev/myorder-staging/kubernetes/mod-am/test-review
+  tag: init
+  dep:
+    - deployment:
+        subName: "api"
+        namespace: mod-am-staging
+        replicas: 1
+        nodeSelector: 
+          pool: spot
+        resource:
+          cpuRequest: 25m
+          memoryRequest: 150Mi
+          memoryLimit: 150Mi
+        port: 8080
+        hpa:
+          enabled: true
+          minReplicas: 3
+          maxReplicas: 5
+      priorityClassName: tier-3
+      labels:
+        team: team-b
+      liveness:
+        isEnabled: true
+        httpGet:
+          path: /healthz
+          port: 8080
+        initialDelaySeconds: 5
+        periodSeconds: 15
+        timeoutSeconds: 5
+        failureThreshold: 3
+      readiness:
+        isEnabled: true
+        httpGet:
+          path: /healthz
+          port: 8080
+        initialDelaySeconds: 10
+        periodSeconds: 15
+        timeoutSeconds: 5
+        failureThreshold: 3
+      ingress:
+        - name: api
+          host: localhost
+          path: /
+          kongPlugin: "kong-jwt,cors-global-plugin,prometheus-kong"
+        - name: api-role
+          host: localhost
+          path: /role
+          kongPlugin: "kong-jwt,cors-global-plugin,prometheus-kong"
+      volumes:
+        GCLOUD:
+          name: gcp-mod-am-svc
+          mountPath: /etc/credentials-gcp
+          secretName: gcp-mod-am-svc
+      extraEnv:
+        APP_ENV: staging
+        GOOGLE_APPLICATION_CREDENTIALS: /etc/credentials/gcp-mod-am-svc.json
+        LOG_LEVEL: debug
+        COLOR: blue
+        MODE: api
+      extraSecrets:
+        - test-review-secret
