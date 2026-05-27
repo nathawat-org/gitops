@@ -12,6 +12,7 @@ spec:
     - list:
         elements:
           - SERVICE_NAME: order-management-service
+          - SERVICE_NAME: discount-management
   template:
     metadata:
       name: >-
