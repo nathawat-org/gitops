@@ -16,6 +16,7 @@ spec:
           - SERVICE_NAME: account-management2-service
             HPA_ENABLED: false
           - SERVICE_NAME: account-management3-service
+          - SERVICE_NAME: test-beta-service
   template:
     metadata:
       name: >-
