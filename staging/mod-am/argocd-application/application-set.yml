@@ -12,6 +12,7 @@ spec:
     - list:
         elements:
           - SERVICE_NAME: account-management-service
+          - SERVICE_NAME: p-test-service
   template:
     metadata:
       name: >-
